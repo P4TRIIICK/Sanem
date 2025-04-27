@@ -1,0 +1,15 @@
+# Backend (Dart)
+backend/.dart_tool/
+backend/bin/server.dart
+backend/pubspec.lock
+
+# Frontend (Flutter)
+frontend/.dart_tool/
+frontend/build/
+frontend/.packages
+frontend/ios/Flutter/Flutter.framework
+frontend/android/.gradle/
+
+# Gerais
+*.log
+*.DS_Store
