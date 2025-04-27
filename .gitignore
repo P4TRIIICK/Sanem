@@ -1,10 +1,14 @@
-# Backend (Laravel/PHP)
-backend/vendor/
-backend/.env
+# Backend (Dart)
+backend/.dart_tool/
+backend/bin/server.dart
+backend/pubspec.lock
 
-# Frontend (Node/React/Angular/Vue)
-frontend/node_modules/
-frontend/.env
+# Frontend (Flutter)
+frontend/.dart_tool/
+frontend/build/
+frontend/.packages
+frontend/ios/Flutter/Flutter.framework
+frontend/android/.gradle/
 
 # Gerais
 *.log
