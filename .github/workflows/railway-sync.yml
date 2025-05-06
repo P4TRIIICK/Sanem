@@ -1,0 +1,38 @@
+name: Sync PostgreSQL with Railway
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**/*.sql'  # Executa apenas quando arquivos SQL forem modificados
+
+jobs:
+  sync-database:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Get changed SQL files
+        id: changed-files
+        uses: tj-actions/changed-files@v35
+        with:
+          files: |
+            **/*.sql
+      
+      - name: Install Railway CLI
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: npm i -g @railway/cli
+        
+      - name: Login to Railway
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: railway login --token ${{ secrets.RAILWAY_TOKEN }}
+        
+      - name: Apply SQL changes
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "Arquivos SQL alterados:"
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "Aplicando alterações do arquivo: $file"
+            cat $file | railway run -- psql
+          done
