@@ -135,7 +135,6 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 30),
                   // Link para cadastro
                   Row(
-                    
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text("Não tem uma conta?"),
