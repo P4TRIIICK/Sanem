@@ -9,11 +9,11 @@ class DatabaseConnection {
     }
 
     //mandei no zap
-    final pgHost = 'ballast.proxy.rlwy.net';
-    final pgPort = 43147;
-    final pgDatabase = 'railway';
-    final pgUser = 'postgres';
-    final pgPassword = 'CKhmHlhYBhiAacBxyvxicxkxhRkCoPXC';
+    final pgHost = '';
+    final pgPort = 0;
+    final pgDatabase = '';
+    final pgUser = '';
+    final pgPassword = '';
 
     _connection = PostgreSQLConnection(
       pgHost,
