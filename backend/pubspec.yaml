@@ -8,15 +8,20 @@ environment:
 
 dependencies:
   flutter:
-    sdk: flutter
-  shelf: ^1.4.0
+    sdk: flutter          # necessário porque o projeto usa provider e cupertino_icons
+
+  # ───── servidor / backend ─────
+  shelf: ^1.4.2           # manteve‑se a versão mais nova vista na branch main
   shelf_router: ^1.1.0
   http: ^1.1.0
-  postgres: ^2.6.3
-  cupertino_icons: ^1.0.5
-  dotenv: ^4.1.0
+  postgres: ^3.5.6        # upgrade em relação à 2.6.3 (exige pequenos ajustes no código)
 
+  # ───── frontend / Flutter ─────
+  cupertino_icons: ^1.0.5
+  provider: ^6.0.5
+  flutter_dotenv: ^5.1.0  #
 
 dev_dependencies:
   lints: ^5.0.0
   test: ^1.24.0
+
