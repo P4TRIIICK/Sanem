@@ -1,10 +1,12 @@
 import 'item_doacao.dart';
 import 'beneficiario.dart';
 
+enum StatusDoacao { APta, Negada }
+
 class Doacao {
   final int id;
   final DateTime instante;
-  final bool statusDoacao; //Criar enum para substituir o booleano
+  final StatusDoacao statusDoacao;
   final List<ItemDoacao> itens;
   final Beneficiario beneficiario;
 

@@ -1,12 +1,11 @@
-
-class Produto{
+class Produto {
   final int id;
-  final String nome;
-  final bool qualidade;
+  String nome;
+  bool qualidade;
 
   Produto({
     required this.id,
     required this.nome,
-    required this.qualidade,
+    this.qualidade = true,
   });
 }

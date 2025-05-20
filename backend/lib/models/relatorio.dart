@@ -1,17 +1,21 @@
-import 'enums/tipoRelatorio_enum.dart';
+import 'funcionario.dart';
+
+enum TipoRelatorio { DOACOES_RECEBIDAS, DOACOES_DISTRIBUIDAS, DOACOES_TODAS }
 
 class Relatorio {
   final int id;
-  final DateTime dataRelatorio;
-  final String formato;
-  final TiporelatorioEnum tipoRelatorio;
-  final String descricao;
+  DateTime dataRelatorio;
+  String formato;
+  TipoRelatorio tipoRelatorio;
+  String? descricao;
+  Funcionario funcionario;
 
   Relatorio({
     required this.id,
     required this.dataRelatorio,
     required this.formato,
     required this.tipoRelatorio,
-    required this.descricao,
+    this.descricao,
+    required this.funcionario,
   });
 }
