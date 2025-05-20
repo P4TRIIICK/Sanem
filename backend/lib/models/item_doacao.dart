@@ -1,26 +1,14 @@
-enum TipoItem {
-  alimento,
-  vestuario,
-  higiene,
-  limpeza,
-  medicamento,
-  movel,
-  eletrodomestico,
-  outro,
-}
+import 'doacao.dart';
+import 'produto.dart';
 
 class ItemDoacao {
-  final int id;
-  final String nome;
-  final String descricao;
-  final int quantidade;
-  final TipoItem tipo;
-  
+  final Doacao doacao;
+  final Produto produto;
+  int quantidade;
+
   ItemDoacao({
-    required this.id,
-    required this.nome,
-    required this.descricao,
+    required this.doacao,
+    required this.produto,
     required this.quantidade,
-    required this.tipo,
   });
 }
