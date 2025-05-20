@@ -14,7 +14,7 @@ dependencies:
   shelf: ^1.4.2           # manteve‑se a versão mais nova vista na branch main
   shelf_router: ^1.1.0
   http: ^1.1.0
-  postgres: ^3.5.6        # upgrade em relação à 2.6.3 (exige pequenos ajustes no código)
+  postgres: ^2.6.1        # upgrade em relação à 2.6.3 (exige pequenos ajustes no código)
 
   # ───── frontend / Flutter ─────
   cupertino_icons: ^1.0.5
