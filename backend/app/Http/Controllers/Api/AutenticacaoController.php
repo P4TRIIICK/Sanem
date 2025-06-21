@@ -65,4 +65,3 @@ class AutenticacaoController extends Controller
         return response()->json(['message' => 'Deslogado com sucesso'], 200);
     }
 }
-//Obs.: os campos password e rememberToken só existem se você tiver adicionado no Model Pessoa a coluna password no banco (e no migration de pessoa). Se não adicionou, crie isso ou adapte para usar outra tabela de usuários.
