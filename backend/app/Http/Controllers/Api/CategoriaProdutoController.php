@@ -12,5 +12,4 @@ class CategoriaProdutoController extends Controller
     {
         return response()->json(CategoriaProduto::with(['categoria','produto'])->get(), 200);
     }
-    // demais métodos se for expor CRUD direto...
 }
