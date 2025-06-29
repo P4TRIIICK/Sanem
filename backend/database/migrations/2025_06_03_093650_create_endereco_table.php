@@ -4,32 +4,34 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateEnderecoTable extends Migration
+return new class extends Migration
 {
-    public function up()
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
         Schema::create('endereco', function (Blueprint $table) {
             $table->id();
-            $table->string('logradouro', 255);
-            $table->string('numero', 50);
-            $table->string('complemento', 255)->nullable();
-            $table->string('bairro', 255)->nullable();
-            $table->string('cep', 20)->nullable();
-            $table->unsignedBigInteger('cidade_id');
-            $table->index('cidade_id');
-            $table->foreign('cidade_id')
-                  ->references('id')->on('cidade')
-                  ->onDelete('restrict')
+            $table->string('logradouro'); // Obrigatório
+            $table->string('numero', 50)->nullable(); // Opcional
+            $table->string('complemento', 255)->nullable(); // Opcional
+            $table->string('bairro'); // Obrigatório
+            $table->string('cep', 20)->nullable(); // Opcional
+            
+            // Chave estrangeira para cidade, usando a sintaxe moderna 'foreignId'
+            $table->foreignId('cidade_id')
+                  ->constrained('cidade')
+                  ->onDelete('restrict') // Impede que uma cidade seja apagada se tiver endereços
                   ->onUpdate('cascade');
         });
     }
 
-    public function down()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
-        Schema::table('endereco', function (Blueprint $table) {
-            $table->dropForeign(['cidade_id']);
-            $table->dropIndex(['cidade_id']);
-        });
         Schema::dropIfExists('endereco');
     }
-}
+};

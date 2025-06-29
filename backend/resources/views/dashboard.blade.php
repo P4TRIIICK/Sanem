@@ -137,7 +137,7 @@
 
             @role('Administrador')
             <li class="nav-item">
-                <a class="nav-link" href="#"> {{-- Substituir '#' pela rota de funcionários --}}
+                <a class="nav-link" href="{{ route('web.funcionarios.index') }}">
                     <i class="bi bi-person-rolodex"></i> Funcionários
                 </a>
             </li>

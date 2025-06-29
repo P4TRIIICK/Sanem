@@ -44,15 +44,24 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->is('beneficiarios*') ? 'active' : '' }}" href="{{ route('beneficiarios.index') }}">
+                <a class="nav-link {{ request()->is('beneficiarios*') ? 'active' : '' }}" href="{{ route('web.beneficiarios.index') }}">
                     <i class="bi bi-people-fill"></i> Beneficiários
                 </a>
             </li>
              <li class="nav-item">
-                <a class="nav-link {{ request()->is('estoque*') ? 'active' : '' }}" href="{{ route('estoque.index') }}">
+                {{-- CORREÇÃO: O link agora usa o nome de rota 'web.estoque.index' --}}
+                <a class="nav-link {{ request()->is('estoque*') ? 'active' : '' }}" href="{{ route('web.estoque.index') }}">
                     <i class="bi bi-box-seam-fill"></i> Estoque
                 </a>
             </li>
+            
+            @role('Administrador')
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('funcionarios*') ? 'active' : '' }}" href="{{ route('web.funcionarios.index') }}">
+                        <i class="bi bi-person-rolodex"></i> Funcionários
+                    </a>
+                </li>
+            @endrole
         </ul>
         <div class="user-dropdown">
            <div class="dropdown">
