@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BeneficiarioWebController;
 use App\Http\Controllers\EstoqueController;
+use App\Http\Controllers\FuncionarioController;
 use Spatie\Permission\Middleware\RoleMiddleware;
 
 /*
@@ -14,54 +15,28 @@ use Spatie\Permission\Middleware\RoleMiddleware;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('web')->group(function () {
+// --- ROTAS PÚBLICAS ---
+Route::get('/', [HomeController::class, 'index'])->name('home.public');
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
 
-    // --- ROTAS PÚBLICAS ---
-    Route::get('/', [HomeController::class, 'index'])->name('home.public');
-    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'login']);
-    
-    // --- MODO APRESENTAÇÃO SEM AUTENTICAÇÃO ---
-    Route::get('/modo-apresentacao', function () {
-        $mockUser = new \stdClass();
-        $mockUser->name = 'Equipe Sanem';
-        return view('dashboard', ['user' => $mockUser]);
-    })->name('presentation.dashboard');
+// --- ROTAS PROTEGIDAS POR AUTENTICAÇÃO ---
+Route::middleware('auth')->group(function () {
 
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // --- ROTAS PROTEGIDAS (AUTENTICAÇÃO + PAPEL) ---
-    Route::middleware([
-        'auth',
-        RoleMiddleware::class . ':Administrador|Consultor',
-    ])->group(function () {
-
-        // Logout
-        Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
-        // Dashboard
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-        // --- BENEFICIÁRIOS (ROTAS WEB COMPLETAS) ---
-        // As 7 rotas padrão de um resource (index, create, store, show, edit, update, destroy)
-        Route::get('/beneficiarios', [BeneficiarioWebController::class, 'index'])->name('web.beneficiarios.index');
-        Route::get('/beneficiarios/create', [BeneficiarioWebController::class, 'create'])->name('web.beneficiarios.create');
-        Route::post('/beneficiarios', [BeneficiarioWebController::class, 'store'])->name('web.beneficiarios.store');
-        Route::get('/beneficiarios/{pessoa}', [BeneficiarioWebController::class, 'show'])->name('web.beneficiarios.show'); // Rota para ver detalhes
-        Route::get('/beneficiarios/{pessoa}/edit', [BeneficiarioWebController::class, 'edit'])->name('web.beneficiarios.edit'); // Rota para mostrar o form de edição
-        Route::put('/beneficiarios/{pessoa}', [BeneficiarioWebController::class, 'update'])->name('web.beneficiarios.update'); // Rota para processar a edição
-        Route::delete('/beneficiarios/{pessoa}', [BeneficiarioWebController::class, 'destroy'])->name('web.beneficiarios.destroy'); // Rota para apagar
-
-        
-        // Rota para o formulário de aprovação (rota customizada)
+    // --- ROTAS PARA BENEFICIÁRIOS E ESTOQUE (Admin e Consultor) ---
+    Route::middleware(RoleMiddleware::class . ':Administrador|Consultor')->group(function () {
+        Route::resource('beneficiarios', BeneficiarioWebController::class)->names('web.beneficiarios');
         Route::get('/beneficiarios/{pessoa}/status', [BeneficiarioWebController::class, 'showApprovalForm'])->name('web.beneficiarios.approvalForm');
         Route::post('/beneficiarios/{pessoa}/status', [BeneficiarioWebController::class, 'processApproval'])->name('web.beneficiarios.processApproval');
-
-
-        // --- ESTOQUE ---
-        Route::get('/estoque', [EstoqueController::class, 'index'])->name('estoque.index');
-        Route::get('/estoque/create', [EstoqueController::class, 'create'])->name('estoque.create');
-        Route::post('/estoque', [EstoqueController::class, 'store'])->name('estoque.store');
-
+        
+        Route::resource('estoque', EstoqueController::class)->names('web.estoque');
     });
 
+    // --- ROTAS PARA FUNCIONÁRIOS (Apenas Administrador) ---
+    Route::middleware(RoleMiddleware::class . ':Administrador')->group(function () {
+        Route::resource('funcionarios', FuncionarioController::class)->names('web.funcionarios')->except(['show']);
+    });
 });
