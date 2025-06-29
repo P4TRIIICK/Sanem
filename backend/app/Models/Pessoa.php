@@ -17,9 +17,6 @@ class Pessoa extends Authenticatable
     protected $table = 'pessoa';
     public $timestamps = false;
     
-    /**
-     * Força o modelo a usar o guarda 'web' por padrão para o Spatie.
-     */
     protected $guard_name = 'web';
 
     /**
@@ -34,11 +31,12 @@ class Pessoa extends Authenticatable
         'nascimento',
         'email',
         'password',
-        'endereco_id'
+        'endereco_id',
+        'foto_path', // <-- CORREÇÃO: Adicionado o campo da foto aqui
     ];
 
     /**
-     * Os atributos que devem ser ocultados para serialização.
+     * Os atributos que devem ser ocultados.
      */
     protected $hidden = [
         'password',
@@ -82,9 +80,7 @@ class Pessoa extends Authenticatable
     }
 
     /**
-     * NOVO: Cria um atributo virtual 'formatted_cpf' que formata o CPF.
-     * Isto permite que você use {{ $pessoa->formatted_cpf }} nas suas views
-     * para mostrar o CPF com o formato XXX.XXX.XXX-XX.
+     * Cria um atributo virtual para o CPF formatado.
      */
     protected function formattedCpf(): Attribute
     {

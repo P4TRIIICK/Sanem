@@ -3,7 +3,6 @@
 namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
-use Closure;
 
 class ValidarCpf implements Rule
 {
@@ -14,15 +13,14 @@ class ValidarCpf implements Rule
      * @param  mixed  $value
      * @return bool
      */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
+    public function passes($attribute, $value)
     {
         // 1. Remove qualquer formatação (pontos, traços)
-        $cpf = preg_replace('/[^0-9]/', '', $value);
+        $cpf = preg_replace('/[^0-9]/', '', (string) $value);
 
         // 2. Verifica se tem 11 dígitos e se não são todos iguais
         if (strlen($cpf) != 11 || preg_match('/(\d)\1{10}/', $cpf)) {
-            $fail('O :attribute não é um CPF válido.');
-            return;
+            return false;
         }
 
         // 3. Calcula os dígitos verificadores para validar o CPF
@@ -32,9 +30,20 @@ class ValidarCpf implements Rule
             }
             $d = ((10 * $d) % 11) % 10;
             if ($cpf[$c] != $d) {
-                $fail('O :attribute não é um CPF válido.');
-                return;
+                return false;
             }
         }
+
+        return true;
+    }
+
+    /**
+     * Get the validation error message.
+     *
+     * @return string
+     */
+    public function message()
+    {
+        return 'O CPF fornecido não é válido.';
     }
 }
