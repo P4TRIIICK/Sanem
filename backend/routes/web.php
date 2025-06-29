@@ -16,19 +16,29 @@ use Spatie\Permission\Middleware\RoleMiddleware;
 
 Route::middleware('web')->group(function () {
 
-    // ... Suas rotas públicas e de login ...
+    // --- ROTAS PÚBLICAS ---
     Route::get('/', [HomeController::class, 'index'])->name('home.public');
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
+    
+    // --- MODO APRESENTAÇÃO SEM AUTENTICAÇÃO ---
+    Route::get('/modo-apresentacao', function () {
+        $mockUser = new \stdClass();
+        $mockUser->name = 'Equipe Sanem';
+        return view('dashboard', ['user' => $mockUser]);
+    })->name('presentation.dashboard');
 
-    // --- ROTAS PROTEGIDAS ---
+
+    // --- ROTAS PROTEGIDAS (AUTENTICAÇÃO + PAPEL) ---
     Route::middleware([
         'auth',
         RoleMiddleware::class . ':Administrador|Consultor',
     ])->group(function () {
 
-        // ... Suas outras rotas protegidas (logout, dashboard) ...
+        // Logout
         Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+        // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         // --- BENEFICIÁRIOS (ROTAS WEB COMPLETAS) ---

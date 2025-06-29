@@ -87,6 +87,7 @@
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/sebastian/recursion-context" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/sebastian/type" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/sebastian/version" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/spatie/laravel-permission" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/staabm/side-effects-detector" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/clock" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/console" />
@@ -125,7 +126,6 @@
       <excludeFolder url="file://$MODULE_DIR$/frontend/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/build" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/spatie/laravel-permission" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
