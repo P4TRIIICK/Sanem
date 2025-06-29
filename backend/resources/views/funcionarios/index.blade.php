@@ -5,33 +5,17 @@
 @section('content')
 
 <div class="container-fluid">
-
-    {{-- Cabeçalho da Página --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h2">Gestão de Funcionários</h1>
-        @role('Administrador')
-            {{-- CORREÇÃO: Removido o parâmetro desnecessário da rota 'create' --}}
-            <a href="{{ route('web.funcionarios.create') }}" class="btn btn-primary" style="background-color: var(--cor-primaria); border-color: var(--cor-primaria);">
-                <i class="bi bi-plus-circle-fill me-1"></i> Novo Funcionário
-            </a>
-        @endrole
+        <a href="{{ route('web.funcionarios.create') }}" class="btn btn-primary" style="background-color: var(--cor-primaria); border-color: var(--cor-primaria);">
+            <i class="bi bi-plus-circle-fill me-1"></i> Novo Funcionário
+        </a>
     </div>
 
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-    
-    @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+    {{-- Alertas de sucesso e erro --}}
+    @if (session('success'))<div class="alert alert-success alert-dismissible fade show" role="alert">{{ session('success') }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>@endif
+    @if (session('error'))<div class="alert alert-danger alert-dismissible fade show" role="alert">{{ session('error') }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>@endif
 
-    {{-- Card com a Tabela de Funcionários --}}
     <div class="card border-0 shadow-sm">
         <div class="card-body">
             <div class="table-responsive">
@@ -59,15 +43,23 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                <a href="{{ route('web.funcionarios.edit', $funcionario->id) }}" class="btn btn-sm btn-warning" title="Editar"><i class="bi bi-pencil-fill"></i></a>
-                                
-                                @if(Auth::user()->id === 1 && $funcionario->id !== 1)
-                                <form action="{{ route('web.funcionarios.destroy', $funcionario->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem a certeza que deseja excluir este funcionário?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Excluir"><i class="bi bi-trash-fill"></i></button>
-                                </form>
+                                {{-- Lógica para botões do Admin Master --}}
+                                @if(Auth::user()->id === 1)
+                                    {{-- Botão Visualizar --}}
+                                    <a href="{{ route('web.funcionarios.show', $funcionario->id) }}" class="btn btn-sm btn-info" title="Ver Detalhes"><i class="bi bi-eye-fill"></i></a>
+                                    
+                                    {{-- Botão Apagar (não aparece para o próprio Admin Master) --}}
+                                    @if($funcionario->id !== 1)
+                                    <form action="{{ route('web.funcionarios.destroy', $funcionario->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem a certeza que deseja excluir este funcionário?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Excluir"><i class="bi bi-trash-fill"></i></button>
+                                    </form>
+                                    @endif
                                 @endif
+
+                                {{-- Botão Editar (visível para todos os Admins) --}}
+                                <a href="{{ route('web.funcionarios.edit', $funcionario->id) }}" class="btn btn-sm btn-warning" title="Editar"><i class="bi bi-pencil-fill"></i></a>
                             </td>
                         </tr>
                         @empty

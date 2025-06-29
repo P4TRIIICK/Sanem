@@ -153,4 +153,17 @@ class FuncionarioController extends Controller
 
         return redirect()->route('web.funcionarios.index')->with('success', 'Funcionário excluído com sucesso.');
     }
+
+    public function show(Pessoa $funcionario)
+    {
+        // Camada extra de segurança no controller
+        if (auth()->user()->id !== 1) {
+            abort(403, 'Ação não autorizada.');
+        }
+
+        // Carrega todos os relacionamentos para exibir os dados completos
+        $funcionario->load(['endereco.cidade.estado', 'telefones', 'funcionario']);
+
+        return view('funcionarios.show', compact('funcionario'));
+    }
 }

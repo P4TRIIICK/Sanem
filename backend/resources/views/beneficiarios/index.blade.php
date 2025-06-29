@@ -38,7 +38,7 @@
                             <tr>
                                 <th scope="row">{{ $pessoa->id }}</th>
                                 <td>{{ $pessoa->nome }}</td>
-                                <td>{{ $pessoa->cpf }}</td>
+                                <td>{{ $pessoa->formatted_cpf }}</td>
                                 <td>
                                     @if($pessoa->beneficiario)
                                         @php

@@ -10,11 +10,12 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use App\Rules\ValidarCpf; // <-- Importa a nova regra de validação
 
 class BeneficiarioWebController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Mostra a lista de beneficiários.
      */
     public function index()
     {
@@ -23,7 +24,7 @@ class BeneficiarioWebController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Mostra o formulário para criar um novo beneficiário.
      */
     public function create()
     {
@@ -31,13 +32,14 @@ class BeneficiarioWebController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Guarda um novo beneficiário na base de dados.
      */
     public function store(Request $request)
     {
         $validatedData = $request->validate([
             'nome' => 'required|string|max:255',
-            'cpf' => 'required|string|max:20|unique:pessoa,cpf',
+            // Usa a nova regra de validação para o CPF
+            'cpf' => ['required', 'string', 'max:20', new ValidarCpf, 'unique:pessoa,cpf'],
             'rg' => 'nullable|string|max:20',
             'genero' => 'required|in:MASCULINO,FEMININO,OUTRO',
             'nascimento' => 'required|date',
@@ -46,13 +48,16 @@ class BeneficiarioWebController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $validatedData) {
+            // Limpa a formatação do CPF antes de guardar para garantir consistência
+            $cpfLimpo = preg_replace('/[^0-9]/', '', $validatedData['cpf']);
+
             $pessoa = Pessoa::create([
                 'nome' => $validatedData['nome'],
-                'cpf' => $validatedData['cpf'],
+                'cpf' => $cpfLimpo, // Guarda apenas os números
                 'rg' => $validatedData['rg'],
                 'genero' => $validatedData['genero'],
                 'nascimento' => $validatedData['nascimento'],
-                'email' => $validatedData['cpf'] . '@sanem.system',
+                'email' => $cpfLimpo . '@sanem.system',
                 'password' => Hash::make(Str::random(10)),
                 'tipo_beneficiario' => 'BENEFICIARIO',
                 'endereco_id' => null,
@@ -71,7 +76,6 @@ class BeneficiarioWebController extends Controller
                 'status' => 'EM_ANALISE',
             ]);
 
-            // Reativado: Atribui o papel de 'Beneficiario' à pessoa criada
             $pessoa->assignRole('Beneficiario');
         });
 
@@ -79,17 +83,16 @@ class BeneficiarioWebController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Mostra os detalhes de um beneficiário.
      */
     public function show(Pessoa $pessoa)
     {
         $pessoa->load('beneficiario');
-        // Reutiliza a view de aprovação para mostrar os detalhes
         return view('beneficiarios.approval', compact('pessoa'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Mostra o formulário para editar um beneficiário.
      */
     public function edit(Pessoa $pessoa)
     {
@@ -98,13 +101,14 @@ class BeneficiarioWebController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Atualiza os dados de um beneficiário.
      */
     public function update(Request $request, Pessoa $pessoa)
     {
         $validatedData = $request->validate([
             'nome'       => 'required|string|max:255',
-            'cpf'        => ['required', 'string', 'max:20', Rule::unique('pessoa')->ignore($pessoa->id)],
+            // Usa a nova regra de validação também na atualização
+            'cpf'        => ['required', 'string', 'max:20', new ValidarCpf, Rule::unique('pessoa')->ignore($pessoa->id)],
             'rg'         => 'nullable|string|max:20',
             'genero'     => 'required|in:MASCULINO,FEMININO,OUTRO',
             'nascimento' => 'required|date',
@@ -113,6 +117,9 @@ class BeneficiarioWebController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $validatedData, $pessoa) {
+            // Limpa a formatação do CPF antes de atualizar
+            $validatedData['cpf'] = preg_replace('/[^0-9]/', '', $validatedData['cpf']);
+            
             $pessoa->update($validatedData);
 
             $fotoPath = $pessoa->beneficiario->foto_path ?? null;
@@ -135,7 +142,7 @@ class BeneficiarioWebController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove um beneficiário.
      */
     public function destroy(Pessoa $pessoa)
     {
@@ -144,7 +151,7 @@ class BeneficiarioWebController extends Controller
     }
 
     /**
-     * Show the form for managing the beneficiary's status.
+     * Mostra o formulário para gerir o status de um beneficiário.
      */
     public function showApprovalForm(Pessoa $pessoa)
     {
@@ -153,13 +160,11 @@ class BeneficiarioWebController extends Controller
     }
 
     /**
-     * Process the approval or rejection of the beneficiary.
+     * Processa a aprovação/reprovação de um beneficiário.
      */
     public function processApproval(Request $request, Pessoa $pessoa)
     {
-        $request->validate([
-            'status' => ['required', Rule::in(['APROVADO', 'REPROVADO'])],
-        ]);
+        $request->validate(['status' => ['required', Rule::in(['APROVADO', 'REPROVADO'])]]);
 
         if ($pessoa->beneficiario) {
             $pessoa->beneficiario->update(['status' => $request->status]);

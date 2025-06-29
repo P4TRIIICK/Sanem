@@ -28,7 +28,10 @@ Route::middleware('auth')->group(function () {
 
     // --- ROTAS PARA BENEFICIÁRIOS E ESTOQUE (Admin e Consultor) ---
     Route::middleware(RoleMiddleware::class . ':Administrador|Consultor')->group(function () {
-        Route::resource('beneficiarios', BeneficiarioWebController::class)->names('web.beneficiarios');
+        Route::resource('beneficiarios', BeneficiarioWebController::class)
+            ->parameters(['beneficiarios' => 'pessoa'])
+            ->names('web.beneficiarios');
+        
         Route::get('/beneficiarios/{pessoa}/status', [BeneficiarioWebController::class, 'showApprovalForm'])->name('web.beneficiarios.approvalForm');
         Route::post('/beneficiarios/{pessoa}/status', [BeneficiarioWebController::class, 'processApproval'])->name('web.beneficiarios.processApproval');
         
@@ -37,6 +40,9 @@ Route::middleware('auth')->group(function () {
 
     // --- ROTAS PARA FUNCIONÁRIOS (Apenas Administrador) ---
     Route::middleware(RoleMiddleware::class . ':Administrador')->group(function () {
-        Route::resource('funcionarios', FuncionarioController::class)->names('web.funcionarios')->except(['show']);
+        // CORREÇÃO: Usando Route::resource para criar todas as rotas, incluindo a 'show'.
+        Route::resource('funcionarios', FuncionarioController::class)
+            ->parameters(['funcionarios' => 'funcionario'])
+            ->names('web.funcionarios');
     });
 });

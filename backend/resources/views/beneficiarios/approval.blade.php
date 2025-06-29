@@ -21,7 +21,7 @@
                 <div class="row">
                     <div class="col-md-8">
                         <p><strong>Nome:</strong> {{ $pessoa->nome }}</p>
-                        <p><strong>CPF:</strong> {{ $pessoa->cpf }}</p>
+                        <p><strong>CPF:</strong> {{ $pessoa->formatted_cpf }}</p>
                         <p><strong>Renda Declarada:</strong> R$ {{ number_format($pessoa->beneficiario->renda ?? 0, 2, ',', '.') }}</p>
                         <p><strong>Status Atual:</strong> {{ $pessoa->beneficiario->status ?? 'Não definido' }}</p>
                     </div>

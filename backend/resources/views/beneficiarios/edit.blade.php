@@ -38,7 +38,8 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="cpf" class="form-label">CPF</label>
-                        <input type="text" class="form-control" id="cpf" name="cpf" value="{{ old('cpf', $pessoa->cpf) }}" required>
+                        {{-- CORREÇÃO: Usando o formatador para exibir o CPF --}}
+                        <input type="text" class="form-control" id="cpf" name="cpf" value="{{ old('cpf', $pessoa->formatted_cpf) }}" required>
                     </div>
                 </div>
                 <div class="row">
