@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('pessoa', function (Blueprint $table) {
@@ -13,23 +16,31 @@ return new class extends Migration
             $table->string('nome');
             $table->string('cpf')->unique();
             $table->string('rg')->nullable();
-            $table->enum('genero', ['MASCULINO','FEMININO','OUTRO']);
-            $table->enum('tipo_beneficiario', ['BENEFICIARIO','DOADOR','BENEFICIARIO_DOADOR']);
+            $table->enum('genero', ['MASCULINO', 'FEMININO', 'OUTRO']);
+            
+            // --- LINHA CORRIGIDA ---
+            // Adicionamos ->nullable() para permitir que usuários administrativos não tenham um tipo.
+            $table->enum('tipo_beneficiario', ['BENEFICIARIO', 'DOADOR', 'BENEFICIARIO_DOADOR'])->nullable();
+            
             $table->date('nascimento')->nullable();
             $table->string('email')->nullable();
 
             // Torna endereco_id opcional
             $table->foreignId('endereco_id')
-                  ->nullable()
-                  ->constrained('endereco')
-                  ->onDelete('restrict')
-                  ->onUpdate('cascade');
-
-            // Coluna password
-            $table->string('password');
+                ->nullable()
+                ->constrained('endereco')
+                ->onDelete('restrict')
+                ->onUpdate('cascade');
+            
+            // Adicionamos a coluna de senha que estava faltando na sua imagem, 
+            // necessária para o login.
+            $table->string('password')->nullable();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('pessoa');
