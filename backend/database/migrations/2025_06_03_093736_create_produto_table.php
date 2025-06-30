@@ -12,6 +12,8 @@ class CreateProdutoTable extends Migration
             $table->id();
             $table->string('nome', 255);
             $table->boolean('qualidade')->default(true);
+            $table->string('tipo_produto');
+            $table->integer('quantidade')->default(0);
         });
     }
 

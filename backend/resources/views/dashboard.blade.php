@@ -11,7 +11,11 @@
         :root {
             --cor-primaria: #008080;
             --cor-acao: #E67E22;
+<<<<<<< Updated upstream
             --cor-fundo: #f4f8fa; /* Tom de cinza/azul mais claro */
+=======
+            --cor-fundo: #f4f8fa;
+>>>>>>> Stashed changes
             --sidebar-bg: #212529;
             --sidebar-link-color: rgba(255, 255, 255, 0.7);
             --sidebar-link-hover: #fff;
@@ -66,7 +70,11 @@
             font-weight: 700;
         }
         .main-content {
+<<<<<<< Updated upstream
             margin-left: 280px; /* Mesma largura do sidebar */
+=======
+            margin-left: 280px;
+>>>>>>> Stashed changes
             padding: 30px;
         }
         .user-dropdown {
@@ -76,12 +84,19 @@
             background-color: rgba(0, 0, 0, 0.2);
         }
         .user-dropdown .nav-link {
+<<<<<<< Updated upstream
              border-left: none; /* Remover borda do link do usuário */
+=======
+            border-left: none;
+>>>>>>> Stashed changes
         }
         .user-dropdown .nav-link.active, .user-dropdown .nav-link:hover {
             background: none;
         }
+<<<<<<< Updated upstream
         /* Estilos dos Cards */
+=======
+>>>>>>> Stashed changes
         .stat-card { background-color: #fff; border: none; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: all 0.3s ease; height: 100%; }
         .stat-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .stat-card .card-body { display: flex; align-items: center; }
@@ -121,7 +136,12 @@
             
             @can('gerenciar-doacoes')
             <li class="nav-item">
+<<<<<<< Updated upstream
                 <a class="nav-link" href="#"> {{-- Substituir '#' pela rota de doações --}}
+=======
+                {{-- ESTA É A ÚNICA ALTERAÇÃO REAL, O LINK CORRIGIDO --}}
+                <a class="nav-link {{ request()->is('doacoes*') ? 'active' : '' }}" href="{{ route('doacoes.index') }}">
+>>>>>>> Stashed changes
                     <i class="bi bi-gift-fill"></i> Doações
                 </a>
             </li>
@@ -129,7 +149,11 @@
 
             @can('gerenciar-estoque')
             <li class="nav-item">
+<<<<<<< Updated upstream
                 <a class="nav-link" href="#"> {{-- Substituir '#' pela rota de estoque --}}
+=======
+                <a class="nav-link" href="#">
+>>>>>>> Stashed changes
                     <i class="bi bi-box-seam-fill"></i> Estoque
                 </a>
             </li>
@@ -137,7 +161,11 @@
 
             @role('Administrador')
             <li class="nav-item">
+<<<<<<< Updated upstream
                 <a class="nav-link" href="{{ route('web.funcionarios.index') }}">
+=======
+                <a class="nav-link" href="#">
+>>>>>>> Stashed changes
                     <i class="bi bi-person-rolodex"></i> Funcionários
                 </a>
             </li>
@@ -147,7 +175,11 @@
         <div class="user-dropdown">
             <div class="dropdown">
                 <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+<<<<<<< Updated upstream
                     <i class="bi bi-person-circle"></i> {{ ($user ?? Auth::user())->name }}
+=======
+                    <i class="bi bi-person-circle"></i> {{ Auth::user()->name }}
+>>>>>>> Stashed changes
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark">
                     <li><a class="dropdown-item" href="#">Meu Perfil</a></li>
@@ -169,13 +201,22 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h1 class="h2">Painel de Controle</h1>
                     @can('gerenciar-doacoes')
+<<<<<<< Updated upstream
                         <a href="#" class="btn btn-primary">
                             <i class="bi bi-plus-circle-fill me-2"></i>Registrar Nova Doação
+=======
+                        <a href="{{ route('doacoes.create') }}" class="btn btn-primary">
+                           <i class="bi bi-plus-circle-fill me-2"></i>Registrar Nova Doação
+>>>>>>> Stashed changes
                         </a>
                     @endcan
                 </div>
 
                 <div class="row g-4">
+<<<<<<< Updated upstream
+=======
+                    {{-- ESTE TRECHO FOI RESTAURADO --}}
+>>>>>>> Stashed changes
                     @can('gerenciar-doacoes')
                     <div class="col-xl-3 col-md-6">
                         <div class="stat-card"><div class="card-body"><div class="icon icon-doacoes"><i class="bi bi-gift-fill"></i></div><div><div class="value">32</div><div class="label">Doações no Mês</div></div></div></div>
@@ -214,7 +255,11 @@
 
             @else
                 <div class="alert alert-info">
+<<<<<<< Updated upstream
                     <h1 class="display-6">Bem-vindo(a), {{ ($user ?? Auth::user())->name }}!</h1>
+=======
+                    <h1 class="display-6">Bem-vindo(a), {{ Auth::user()->name }}!</h1>
+>>>>>>> Stashed changes
                     <p class="lead">Obrigado por fazer parte da família Sanem. Esta é a sua área pessoal.</p>
                     <hr>
                     @can('registrar-propria-doacao')
@@ -227,4 +272,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+<<<<<<< Updated upstream
 </html>
+=======
+</html>
+>>>>>>> Stashed changes

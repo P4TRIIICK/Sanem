@@ -14,6 +14,10 @@ class DatabaseSeeder extends Seeder
     {
         // Chama os seeders na ordem de dependência
         $this->call([
+<<<<<<< Updated upstream
+=======
+            ProdutoSeeder::class,  
+>>>>>>> Stashed changes
             RolesAndPermissionsSeeder::class, // 1º - Cria os papéis e permissões
             PessoaSeeder::class,              // 2º - Cria as pessoas e atribui os papéis
         ]);

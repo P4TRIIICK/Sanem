@@ -4,29 +4,31 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDoacaoTable extends Migration
+return new class extends Migration
 {
-    public function up()
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
         Schema::create('doacao', function (Blueprint $table) {
             $table->id();
-            $table->dateTime('instante');
-            $table->enum('status_doacao', ['DOACAO_APTA', 'DOACAO_NEGADA']);
-            $table->unsignedBigInteger('pessoa_id');
-            $table->index('pessoa_id');
-            $table->foreign('pessoa_id')
-                  ->references('id')->on('pessoa')
-                  ->onDelete('restrict')
-                  ->onUpdate('cascade');
+            $table->foreignId('pessoa_id')->constrained('pessoa');
+            $table->date('data_doacao');
+            $table->time('instante');
+            
+            // CORREÇÃO APLICADA AQUI:
+            // Usar ENUM para definir os valores permitidos e corrigir o erro de 'Data truncated'.
+            $table->enum('status_doacao', ['RECEBIDO', 'EM_ANALISE', 'APROVADO', 'RECUSADO']);
+            $table->enum('status_entrega', ['PENDENTE', 'ENTREGUE', 'CANCELADO']);
         });
     }
 
-    public function down()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
-        Schema::table('doacao', function (Blueprint $table) {
-            $table->dropForeign(['pessoa_id']);
-            $table->dropIndex(['pessoa_id']);
-        });
         Schema::dropIfExists('doacao');
     }
-}
+};
