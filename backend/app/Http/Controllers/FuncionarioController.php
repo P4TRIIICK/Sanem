@@ -12,23 +12,31 @@ use App\Models\Funcionario;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
+use App\Rules\ValidarCpf;
 
 class FuncionarioController extends Controller
 {
-    /**
-     * Mostra a lista de funcionários.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        // Busca todas as pessoas que têm o papel de 'Administrador' OU 'Consultor'
-        $funcionarios = Pessoa::whereHas('roles', function ($query) {
+        $search = $request->query('search');
+
+        // Começa a query base para buscar funcionários
+        $query = Pessoa::whereHas('roles', function ($query) {
             $query->whereIn('name', ['Administrador', 'Consultor']);
-        })
-        ->with('roles')
-        ->where('id', '!=', 1) // Opcional: não mostrar o Admin Master na lista
-        ->paginate(15);
+        })->with('roles')->where('id', '!=', 1);
+
+        // Se houver um termo de pesquisa, adiciona a condição de filtro
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nome', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $funcionarios = $query->paginate(15);
 
         return view('funcionarios.index', compact('funcionarios'));
     }
@@ -41,18 +49,13 @@ class FuncionarioController extends Controller
         return view('funcionarios.create');
     }
 
-    /**
-     * Guarda um novo funcionário e os seus dados relacionados.
-     */
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            // Dados Pessoais
             'nome' => 'required|string|max:255',
             'cpf' => 'required|string|max:20|unique:pessoa,cpf',
             'rg' => 'nullable|string|max:20',
             'nascimento' => 'required|date',
-            // Contato e Endereço
             'telefone' => 'nullable|string|max:20',
             'logradouro' => 'required|string|max:255',
             'numero' => 'nullable|string|max:50',
@@ -60,17 +63,21 @@ class FuncionarioController extends Controller
             'bairro' => 'required|string|max:255',
             'cidade' => 'required|string|max:255',
             'estado' => 'required|string|max:255',
-            // Dados Profissionais e de Acesso
             'salario' => 'nullable|numeric|min:0',
             'data_contratacao' => 'required|date',
             'email' => 'required|email|unique:pessoa,email',
             'password' => ['required', Password::min(8)],
             'role' => ['required', Rule::in(['Administrador', 'Consultor'])],
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validação da foto
         ]);
 
-        // Usa uma transaction para garantir que tudo seja salvo junto, ou nada seja salvo.
-        DB::transaction(function () use ($validatedData) {
-            // 1. Cria ou encontra Estado, Cidade e Endereço
+        DB::transaction(function () use ($request, $validatedData) {
+            $fotoPath = null;
+            // 1. Guarda a foto, se ela foi enviada
+            if ($request->hasFile('foto')) {
+                $fotoPath = $request->file('foto')->store('fotos_funcionarios', 'public');
+            }
+
             $estado = Estado::firstOrCreate(['nome' => $validatedData['estado']]);
             $cidade = Cidade::firstOrCreate(['nome' => $validatedData['cidade'], 'estado_id' => $estado->id]);
             $endereco = Endereco::create([
@@ -81,72 +88,152 @@ class FuncionarioController extends Controller
                 'cidade_id' => $cidade->id
             ]);
 
-            // 2. Cria a Pessoa
+            // 2. Cria a Pessoa, incluindo o caminho da foto
             $pessoa = Pessoa::create([
                 'nome' => $validatedData['nome'],
-                'cpf' => $validatedData['cpf'],
+                'cpf' => preg_replace('/[^0-9]/', '', $validatedData['cpf']), // Guarda só os números
                 'rg' => $validatedData['rg'],
                 'nascimento' => $validatedData['nascimento'],
                 'email' => $validatedData['email'],
                 'password' => Hash::make($validatedData['password']),
                 'endereco_id' => $endereco->id,
+                'foto_path' => $fotoPath, // Guarda o caminho da foto
             ]);
 
-            // 3. Cria o Telefone, se fornecido
             if (!empty($validatedData['telefone'])) {
                 Telefone::create(['pessoa_id' => $pessoa->id, 'numero' => $validatedData['telefone']]);
             }
             
-            // 4. Cria o registo de Funcionário
             Funcionario::create([
-                'id' => $pessoa->id, // Usa o mesmo ID da pessoa
+                'id' => $pessoa->id,
                 'nivel_acesso' => $validatedData['role'],
                 'salario' => $validatedData['salario'],
                 'data_contratacao' => $validatedData['data_contratacao'],
             ]);
 
-            // 5. Atribui o papel (Cargo)
             $pessoa->assignRole($validatedData['role']);
         });
 
         return redirect()->route('web.funcionarios.index')->with('success', 'Funcionário cadastrado com sucesso!');
     }
+    
+    public function show(Pessoa $funcionario)
+    {
+        if (auth()->user()->id !== 1) {
+            abort(403, 'Ação não autorizada.');
+        }
+        $funcionario->load(['endereco.cidade.estado', 'telefones', 'funcionario']);
+        return view('funcionarios.show', compact('funcionario'));
+    }
 
-    /**
-     * Mostra o formulário para editar um funcionário.
-     */
     public function edit(Pessoa $funcionario)
     {
+        $funcionario->load(['endereco.cidade.estado', 'telefones', 'funcionario']);
         return view('funcionarios.edit', compact('funcionario'));
     }
 
     /**
-     * Atualiza os dados do funcionário.
+     * Atualiza um funcionário existente com todos os seus dados.
      */
     public function update(Request $request, Pessoa $funcionario)
     {
-        $validated = $request->validate([
+        $validatedData = $request->validate([
+            // Validação de todos os campos do formulário de edição
+            'nome' => 'required|string|max:255',
+            'cpf' => ['required', new ValidarCpf, Rule::unique('pessoa')->ignore($funcionario->id)],
+            'rg' => 'nullable|string|max:20',
+            'nascimento' => 'required|date',
+            'telefone' => 'nullable|string|max:20',
+            'logradouro' => 'required|string|max:255',
+            'numero' => 'nullable|string|max:50',
+            'cep' => 'nullable|string|max:20',
+            'bairro' => 'required|string|max:255',
+            'cidade' => 'required|string|max:255',
+            'estado' => 'required|string|max:255',
+            'salario' => 'nullable|numeric|min:0',
+            'data_contratacao' => 'required|date',
             'email' => ['required', 'email', Rule::unique('pessoa')->ignore($funcionario->id)],
-            'password' => ['nullable', 'confirmed', Password::min(8)],
+            'password' => ['nullable', Password::min(8)], // A senha é opcional na edição
+            'role' => ['required', Rule::in(['Administrador', 'Consultor'])],
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $funcionario->email = $validated['email'];
-        if (!empty($validated['password'])) {
-            $funcionario->password = Hash::make($validated['password']);
-        }
-        $funcionario->save();
+        DB::transaction(function () use ($request, $validatedData, $funcionario) {
+            
+            // 1. Lida com o upload da foto
+            $fotoPath = $funcionario->foto_path;
+            if ($request->hasFile('foto')) {
+                // Apaga a foto antiga, se existir
+                if ($fotoPath) {
+                    Storage::disk('public')->delete($fotoPath);
+                }
+                // Guarda a nova foto e atualiza o caminho
+                $fotoPath = $request->file('foto')->store('fotos_funcionarios', 'public');
+            }
+
+            // 2. Atualiza o endereço
+            $estado = Estado::firstOrCreate(['nome' => $validatedData['estado']]);
+            $cidade = Cidade::firstOrCreate(['nome' => $validatedData['cidade'], 'estado_id' => $estado->id]);
+            // Usa updateOrCreate para atualizar o endereço existente ou criar um novo se não existir
+            $funcionario->endereco()->updateOrCreate(
+                ['id' => $funcionario->endereco_id],
+                [
+                    'logradouro' => $validatedData['logradouro'],
+                    'numero' => $validatedData['numero'],
+                    'bairro' => $validatedData['bairro'],
+                    'cep' => $validatedData['cep'],
+                    'cidade_id' => $cidade->id
+                ]
+            );
+
+            // 3. Prepara os dados da Pessoa
+            $pessoaData = $validatedData;
+            $pessoaData['cpf'] = preg_replace('/[^0-9]/', '', $validatedData['cpf']);
+            $pessoaData['foto_path'] = $fotoPath;
+
+            // Lida com a atualização da senha (só se uma nova foi fornecida)
+            if (!empty($validatedData['password'])) {
+                $pessoaData['password'] = Hash::make($validatedData['password']);
+            } else {
+                unset($pessoaData['password']); // Remove a senha do array se estiver vazia
+            }
+            
+            // 4. Atualiza a Pessoa
+            $funcionario->update($pessoaData);
+
+            // 5. Atualiza o Telefone
+            if (!empty($validatedData['telefone'])) {
+                $funcionario->telefones()->updateOrCreate(['pessoa_id' => $funcionario->id], ['numero' => $validatedData['telefone']]);
+            } else {
+                $funcionario->telefones()->delete(); // Apaga o telefone se o campo for deixado em branco
+            }
+
+            // 6. Atualiza os dados do Funcionário
+            $funcionario->funcionario()->updateOrCreate(
+                ['id' => $funcionario->id],
+                [
+                    'nivel_acesso' => $validatedData['role'],
+                    'salario' => $validatedData['salario'],
+                    'data_contratacao' => $validatedData['data_contratacao'],
+                ]
+            );
+
+            // 7. Sincroniza o papel (cargo)
+            $funcionario->syncRoles([$validatedData['role']]);
+        });
 
         return redirect()->route('web.funcionarios.index')->with('success', 'Funcionário atualizado com sucesso!');
     }
 
-    /**
-     * Apaga um funcionário.
-     */
     public function destroy(Pessoa $funcionario)
     {
-        // Regra de segurança para proteger o Admin Master
         if (Auth::user()->id !== 1 || $funcionario->id === 1) {
             return redirect()->route('web.funcionarios.index')->with('error', 'Ação não permitida.');
+        }
+
+        // Apaga a foto antiga do storage antes de apagar o registo
+        if ($funcionario->foto_path) {
+            Storage::disk('public')->delete($funcionario->foto_path);
         }
 
         $funcionario->delete();

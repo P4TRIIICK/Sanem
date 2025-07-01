@@ -10,11 +10,24 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h2">Gestão de Funcionários</h1>
         @role('Administrador')
-            {{-- CORREÇÃO: Removido o parâmetro desnecessário da rota 'create' --}}
             <a href="{{ route('web.funcionarios.create') }}" class="btn btn-primary" style="background-color: var(--cor-primaria); border-color: var(--cor-primaria);">
                 <i class="bi bi-plus-circle-fill me-1"></i> Novo Funcionário
             </a>
         @endrole
+    </div>
+    
+    {{-- NOVO: Formulário de Pesquisa --}}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form action="{{ route('web.funcionarios.index') }}" method="GET">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Pesquisar por nome ou email do funcionário..." value="{{ request('search') }}">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="bi bi-search"></i> Pesquisar
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     @if (session('success'))
@@ -59,15 +72,17 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                <a href="{{ route('web.funcionarios.edit', $funcionario->id) }}" class="btn btn-sm btn-warning" title="Editar"><i class="bi bi-pencil-fill"></i></a>
-                                
-                                @if(Auth::user()->id === 1 && $funcionario->id !== 1)
-                                <form action="{{ route('web.funcionarios.destroy', $funcionario->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem a certeza que deseja excluir este funcionário?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Excluir"><i class="bi bi-trash-fill"></i></button>
-                                </form>
+                                @if(Auth::user()->id === 1)
+                                    <a href="{{ route('web.funcionarios.show', $funcionario->id) }}" class="btn btn-sm btn-info" title="Ver Detalhes"><i class="bi bi-eye-fill"></i></a>
+                                    @if($funcionario->id !== 1)
+                                    <form action="{{ route('web.funcionarios.destroy', $funcionario->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem a certeza que deseja excluir este funcionário?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Excluir"><i class="bi bi-trash-fill"></i></button>
+                                    </form>
+                                    @endif
                                 @endif
+                                <a href="{{ route('web.funcionarios.edit', $funcionario->id) }}" class="btn btn-sm btn-warning" title="Editar"><i class="bi bi-pencil-fill"></i></a>
                             </td>
                         </tr>
                         @empty
@@ -80,7 +95,8 @@
             </div>
         </div>
         <div class="card-footer bg-white">
-            {!! $funcionarios->links() !!}
+            {{-- CORREÇÃO: Adiciona a query da pesquisa aos links de paginação --}}
+            {!! $funcionarios->appends(request()->query())->links() !!}
         </div>
     </div>
 </div>

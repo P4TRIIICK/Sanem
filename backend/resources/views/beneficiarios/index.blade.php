@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Beneficiários - Sanem')
+@section('title', 'Gestão de Beneficiários - Sanem')
 
 @section('content')
 
@@ -11,6 +11,20 @@
         <a href="{{ route('web.beneficiarios.create') }}" class="btn btn-primary" style="background-color: var(--cor-primaria); border-color: var(--cor-primaria);">
             <i class="bi bi-plus-circle-fill me-1"></i> Novo Beneficiário
         </a>
+    </div>
+
+    {{-- NOVO: Formulário de Pesquisa --}}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form action="{{ route('web.beneficiarios.index') }}" method="GET">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Pesquisar por nome ou CPF do beneficiário..." value="{{ request('search') }}">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="bi bi-search"></i> Pesquisar
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     @if (session('success'))
@@ -38,7 +52,7 @@
                             <tr>
                                 <th scope="row">{{ $pessoa->id }}</th>
                                 <td>{{ $pessoa->nome }}</td>
-                                <td>{{ $pessoa->cpf }}</td>
+                                <td>{{ $pessoa->formatted_cpf }}</td>
                                 <td>
                                     @if($pessoa->beneficiario)
                                         @php
@@ -66,7 +80,6 @@
                                     @endif
                                 </td>
                                 <td class="text-center">
-                                    {{-- Botão de Gerenciar Status --}}
                                     @if($pessoa->beneficiario)
                                         @can('aprovar-beneficiarios')
                                             <a href="{{ route('web.beneficiarios.approvalForm', $pessoa->id) }}" class="btn btn-sm btn-secondary" title="Gerenciar Status">
@@ -75,12 +88,8 @@
                                         @endcan
                                     @endif
                                     
-                                    {{-- BOTÃO DE VISUALIZAR REMOVIDO --}}
-                                    
                                     @can('gerenciar-beneficiarios')
-                                        {{-- Botão de Editar agora aponta para a rota de edição --}}
                                         <a href="{{ route('web.beneficiarios.edit', $pessoa->id) }}" class="btn btn-sm btn-warning" title="Editar"><i class="bi bi-pencil-fill"></i></a>
-                                        
                                         <form action="{{ route('web.beneficiarios.destroy', $pessoa->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir este beneficiário?');">
                                             @csrf
                                             @method('DELETE')
@@ -101,7 +110,8 @@
             </div>
         </div>
         <div class="card-footer bg-white">
-            {!! $beneficiarios->links() !!}
+            {{-- Adiciona a query da pesquisa aos links de paginação --}}
+            {!! $beneficiarios->appends(request()->query())->links() !!}
         </div>
     </div>
 </div>

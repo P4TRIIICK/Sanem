@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -16,10 +17,6 @@ class Pessoa extends Authenticatable
     protected $table = 'pessoa';
     public $timestamps = false;
     
-    /**
-     * Força o modelo a usar o guarda 'web' por padrão para o Spatie.
-     * Isso resolve o conflito de permissão 403 após o login web.
-     */
     protected $guard_name = 'web';
 
     /**
@@ -34,11 +31,12 @@ class Pessoa extends Authenticatable
         'nascimento',
         'email',
         'password',
-        'endereco_id'
+        'endereco_id',
+        'foto_path', // <-- CORREÇÃO: Adicionado o campo da foto aqui
     ];
 
     /**
-     * Os atributos que devem ser ocultados para serialização.
+     * Os atributos que devem ser ocultados.
      */
     protected $hidden = [
         'password',
@@ -50,11 +48,12 @@ class Pessoa extends Authenticatable
     protected function casts(): array
     {
         return [
-            'password' => 'hashed', // Garante que a senha sempre seja criptografada
+            'password' => 'hashed',
         ];
     }
 
     // --- Relacionamentos ---
+
     public function endereco()
     {
         return $this->belongsTo(Endereco::class, 'endereco_id');
@@ -74,14 +73,24 @@ class Pessoa extends Authenticatable
     {
         return $this->hasOne(Funcionario::class, 'id');
     }
-
-    /**
-     * Define o relacionamento com Beneficiario.
-     * Uma Pessoa pode ter um registro de Beneficiario.
-     * CORREÇÃO: A chave estrangeira na tabela 'beneficiarios' é 'pessoa_id'.
-     */
+    
     public function beneficiario(): HasOne
     {
         return $this->hasOne(Beneficiario::class, 'pessoa_id');
+    }
+
+    /**
+     * Cria um atributo virtual para o CPF formatado.
+     */
+    protected function formattedCpf(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value, $attributes) =>
+                preg_replace(
+                    "/(\d{3})(\d{3})(\d{3})(\d{2})/",
+                    "$1.$2.$3-$4",
+                    $attributes['cpf']
+                )
+        );
     }
 }

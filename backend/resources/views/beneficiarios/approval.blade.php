@@ -16,14 +16,23 @@
             <h5 class="card-title mb-0">Revisão de Cadastro</h5>
         </div>
         <div class="card-body p-4">
-            {{-- CORREÇÃO: Adicionada verificação para garantir que $pessoa->beneficiario existe --}}
             @if($pessoa->beneficiario)
                 <div class="row">
                     <div class="col-md-8">
                         <p><strong>Nome:</strong> {{ $pessoa->nome }}</p>
-                        <p><strong>CPF:</strong> {{ $pessoa->cpf }}</p>
+                        <p><strong>CPF:</strong> {{ $pessoa->formatted_cpf }}</p>
                         <p><strong>Renda Declarada:</strong> R$ {{ number_format($pessoa->beneficiario->renda ?? 0, 2, ',', '.') }}</p>
                         <p><strong>Status Atual:</strong> {{ $pessoa->beneficiario->status ?? 'Não definido' }}</p>
+                        {{-- NOVO: Verificação de endereço --}}
+                        <p><strong>Endereço:</strong> 
+                            @if($pessoa->endereco)
+                                {{ $pessoa->endereco->logradouro ?? '' }}, {{ $pessoa->endereco->numero ?? 's/n' }} - 
+                                {{ $pessoa->endereco->bairro ?? '' }}, 
+                                {{ $pessoa->endereco->cidade->nome ?? '' }} - {{ $pessoa->endereco->cidade->estado->nome ?? '' }}
+                            @else
+                                Não consta
+                            @endif
+                        </p>
                     </div>
                     <div class="col-md-4 text-center">
                         @if($pessoa->beneficiario->foto_path)

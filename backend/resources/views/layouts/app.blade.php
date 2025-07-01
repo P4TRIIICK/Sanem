@@ -48,6 +48,13 @@
                     <i class="bi bi-people-fill"></i> Beneficiários
                 </a>
             </li>
+            @can('gerenciar-doacoes')
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('doacoes*') ? 'active' : '' }}" href="{{ route('web.doacoes.index') }}">
+                        <i class="bi bi-gift-fill"></i> Doações
+                    </a>
+                </li>
+            @endcan
              <li class="nav-item">
                 {{-- CORREÇÃO: O link agora usa o nome de rota 'web.estoque.index' --}}
                 <a class="nav-link {{ request()->is('estoque*') ? 'active' : '' }}" href="{{ route('web.estoque.index') }}">
