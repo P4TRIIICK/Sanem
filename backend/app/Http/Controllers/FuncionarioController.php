@@ -19,14 +19,24 @@ use App\Rules\ValidarCpf;
 
 class FuncionarioController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $funcionarios = Pessoa::whereHas('roles', function ($query) {
+        $search = $request->query('search');
+
+        // Começa a query base para buscar funcionários
+        $query = Pessoa::whereHas('roles', function ($query) {
             $query->whereIn('name', ['Administrador', 'Consultor']);
-        })
-        ->with('roles')
-        ->where('id', '!=', 1) // Opcional: não mostrar o Admin Master na lista
-        ->paginate(15);
+        })->with('roles')->where('id', '!=', 1);
+
+        // Se houver um termo de pesquisa, adiciona a condição de filtro
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nome', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $funcionarios = $query->paginate(15);
 
         return view('funcionarios.index', compact('funcionarios'));
     }

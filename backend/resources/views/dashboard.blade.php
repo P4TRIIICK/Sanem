@@ -20,7 +20,8 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h2">Painel de Controle</h1>
         @can('gerenciar-doacoes')
-            <a href="#" class="btn btn-primary" style="background-color: var(--cor-primaria); border-color: var(--cor-primaria);">
+            {{-- CORREÇÃO: O link agora aponta para a rota de criação de doações --}}
+            <a href="{{ route('web.doacoes.create') }}" class="btn btn-primary" style="background-color: var(--cor-primaria); border-color: var(--cor-primaria);">
                 <i class="bi bi-plus-circle-fill me-2"></i>Registrar Nova Doação
             </a>
         @endcan
@@ -29,25 +30,26 @@
     <div class="row g-4">
         @can('gerenciar-doacoes')
         <div class="col-xl-3 col-md-6">
-            <a href="#" class="stat-card"><div class="card-body"><div class="icon icon-doacoes"><i class="bi bi-gift-fill"></i></div><div><div class="value">32</div><div class="label">Doações no Mês</div></div></div></a>
+            {{-- O link do card agora aponta para o histórico de doações --}}
+            <a href="{{ route('web.doacoes.index') }}" class="stat-card"><div class="card-body"><div class="icon icon-doacoes"><i class="bi bi-gift-fill"></i></div><div><div class="value">{{$totalDoacoesMes ?? 0}}</div><div class="label">Doações no Mês</div></div></div></a>
         </div>
         @endcan
 
         @can('gerenciar-beneficiarios')
         <div class="col-xl-3 col-md-6">
-            <a href="{{ route('web.beneficiarios.index') }}" class="stat-card"><div class="card-body"><div class="icon icon-beneficiarios"><i class="bi bi-people-fill"></i></div><div><div class="value">{{ $totalBeneficiarios }}</div><div class="label">Beneficiários Ativos</div></div></div></a>
+            <a href="{{ route('web.beneficiarios.index') }}" class="stat-card"><div class="card-body"><div class="icon icon-beneficiarios"><i class="bi bi-people-fill"></i></div><div><div class="value">{{ $totalBeneficiarios ?? 0 }}</div><div class="label">Beneficiários Ativos</div></div></div></a>
         </div>
         @endcan
 
         @can('gerenciar-estoque')
         <div class="col-xl-3 col-md-6">
-            <a href="{{ route('web.estoque.index') }}" class="stat-card"><div class="card-body"><div class="icon icon-estoque"><i class="bi bi-box-seam-fill"></i></div><div><div class="value">458</div><div class="label">Itens em Estoque</div></div></div></a>
+            <a href="{{ route('web.estoque.index') }}" class="stat-card"><div class="card-body"><div class="icon icon-estoque"><i class="bi bi-box-seam-fill"></i></div><div><div class="value">{{ $totalItensEstoque ?? 0 }}</div><div class="label">Itens em Estoque</div></div></div></a>
         </div>
         @endcan
         
         @role('Administrador')
         <div class="col-xl-3 col-md-6">
-            <a href="{{ route('web.funcionarios.index') }}" class="stat-card"><div class="card-body"><div class="icon icon-usuarios"><i class="bi bi-shield-lock-fill"></i></div><div><div class="value">{{ $totalFuncionarios }}</div><div class="label">Gerenciar Funcionários</div></div></div></a>
+            <a href="{{ route('web.funcionarios.index') }}" class="stat-card"><div class="card-body"><div class="icon icon-usuarios"><i class="bi bi-shield-lock-fill"></i></div><div><div class="value">{{ $totalFuncionarios ?? 0 }}</div><div class="label">Gerenciar Funcionários</div></div></div></a>
         </div>
         @endrole
     </div>
